@@ -47,6 +47,7 @@ func GetIgnHeadlines() NewsResponse {
 }
 
 func GetPolygonHeadlines() NewsResponse {
+	newsAPIKey := os.Getenv("NEWS_API_KEY")
 	var polygonResponse NewsResponse
 	resp, err := http.Get("https://newsapi.org/v2/top-headlines?sources=polygon&apiKey=" + newsAPIKey)
 
