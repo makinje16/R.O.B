@@ -25,10 +25,10 @@ type NewsResponse struct {
 	Articles     []headlines
 }
 
-func GetIgnHeadlines() NewsResponse {
+func GetSourceHeadlines(source string) NewsResponse {
 	newsAPIKey := os.Getenv("NEWS_API_KEY")
-	var ignResponse NewsResponse
-	resp, err := http.Get("https://newsapi.org/v2/top-headlines?sources=ign&apiKey=" + newsAPIKey)
+	var newsResponse NewsResponse
+	resp, err := http.Get("https://newsapi.org/v2/top-headlines?sources=" + source + "&apiKey=" + newsAPIKey)
 
 	if err != nil {
 		panic(err)
@@ -38,43 +38,26 @@ func GetIgnHeadlines() NewsResponse {
 
 	if resp.StatusCode == http.StatusOK {
 		bodyBytes, _ := ioutil.ReadAll(resp.Body)
-		err := json.Unmarshal(bodyBytes, &ignResponse)
+		err := json.Unmarshal(bodyBytes, &newsResponse)
 		if err == nil {
-			return ignResponse
+			return newsResponse
 		}
 	}
-	return ignResponse
-}
-
-func GetPolygonHeadlines() NewsResponse {
-	newsAPIKey := os.Getenv("NEWS_API_KEY")
-	var polygonResponse NewsResponse
-	resp, err := http.Get("https://newsapi.org/v2/top-headlines?sources=polygon&apiKey=" + newsAPIKey)
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, _ := ioutil.ReadAll(resp.Body)
-		err := json.Unmarshal(bodyBytes, &polygonResponse)
-		if err == nil {
-			return polygonResponse
-		}
-	}
-	return polygonResponse
+	return newsResponse
 }
 
 func main() {
 	r := gin.Default()
-	r.GET("/ign", func(c *gin.Context) {
-		c.JSON(http.StatusOK, GetIgnHeadlines())
+	r.GET("/headlines/ign", func(c *gin.Context) {
+		c.JSON(http.StatusOK, GetSourceHeadlines("ign"))
 	})
 
-	r.GET("/polygon", func(c *gin.Context) {
-		c.JSON(http.StatusOK, GetPolygonHeadlines())
+	r.GET("/headlines/polygon", func(c *gin.Context) {
+		c.JSON(http.StatusOK, GetSourceHeadlines("polygon"))
+	})
+
+	r.GET("/headlines/techcrunch", func(c *gin.Context) {
+		c.JSON(http.StatusOK, GetSourceHeadlines("techcrunch"))
 	})
 	r.Run()
 }
