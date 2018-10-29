@@ -59,5 +59,9 @@ func main() {
 	r.GET("/headlines/techcrunch", func(c *gin.Context) {
 		c.JSON(http.StatusOK, GetSourceHeadlines("techcrunch"))
 	})
+
+	r.GET("/headlines/hacker-news", func(c *gin.Context) {
+		c.JSON(http.StatusOK, GetSourceHeadlines("hacker-news"))
+	})
 	r.Run()
 }
