@@ -32,7 +32,6 @@ func GetSourceHeadlines(source string, newsAPIKey string) NewsResponse {
 	var newsResponse NewsResponse
 	url := "https://newsapi.org/v2/top-headlines?sources=" + source + "&apiKey=" + newsAPIKey
 	resp, err := http.Get(url)
-	println(url)
 	if err != nil {
 		panic(err)
 	}
