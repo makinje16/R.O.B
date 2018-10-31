@@ -22,14 +22,17 @@ type headlines struct {
 type NewsResponse struct {
 	Status       string
 	TotalResults int
+	Code         string
+	Message      string
+	URL          string
 	Articles     []headlines
 }
 
-func GetSourceHeadlines(source string) NewsResponse {
-	newsAPIKey := os.Getenv("NEWS_API_KEY")
+func GetSourceHeadlines(source string, newsAPIKey string) NewsResponse {
 	var newsResponse NewsResponse
-	resp, err := http.Get("https://newsapi.org/v2/top-headlines?sources=" + source + "&apiKey=" + newsAPIKey)
-
+	url := "https://newsapi.org/v2/top-headlines?sources=" + source + "&apiKey=" + newsAPIKey
+	resp, err := http.Get(url)
+	println(url)
 	if err != nil {
 		panic(err)
 	}
@@ -42,26 +45,35 @@ func GetSourceHeadlines(source string) NewsResponse {
 		if err == nil {
 			return newsResponse
 		}
+		panic(err)
+	} else {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		_ = json.Unmarshal(bodyBytes, &newsResponse)
+		newsResponse.URL = url
+		return newsResponse
 	}
-	return newsResponse
 }
 
 func main() {
+	if len(os.Args) != 2 {
+		print("Usage: ./server <news-api-key>\n")
+		os.Exit(99)
+	}
 	r := gin.Default()
 	r.GET("/headlines/ign", func(c *gin.Context) {
-		c.JSON(http.StatusOK, GetSourceHeadlines("ign"))
+		c.JSON(http.StatusOK, GetSourceHeadlines("ign", os.Args[1]))
 	})
 
 	r.GET("/headlines/polygon", func(c *gin.Context) {
-		c.JSON(http.StatusOK, GetSourceHeadlines("polygon"))
+		c.JSON(http.StatusOK, GetSourceHeadlines("polygon", os.Args[1]))
 	})
 
 	r.GET("/headlines/techcrunch", func(c *gin.Context) {
-		c.JSON(http.StatusOK, GetSourceHeadlines("techcrunch"))
+		c.JSON(http.StatusOK, GetSourceHeadlines("techcrunch", os.Args[1]))
 	})
 
 	r.GET("/headlines/hacker-news", func(c *gin.Context) {
-		c.JSON(http.StatusOK, GetSourceHeadlines("hacker-news"))
+		c.JSON(http.StatusOK, GetSourceHeadlines("hacker-news", os.Args[1]))
 	})
-	r.Run()
+	r.Run(":80")
 }
